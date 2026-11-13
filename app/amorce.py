@@ -12,7 +12,7 @@ from .db import Connecteur, Demande, Dev, Soutien, session
 from .etat import relever_github
 from .securite import hacher
 
-PROPRIO_GITHUB = os.environ.get("RELAIS_AMORCE_GITHUB", "sotechdi")
+PROPRIO_GITHUB = os.environ.get("RELAIS_AMORCE_GITHUB", "dondirechristian")
 
 CONNECTEURS = [
     {
