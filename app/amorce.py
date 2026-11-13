@@ -1,5 +1,5 @@
 """Premier contenu de la plateforme : les connecteurs publiés par SOTECHDI
-(code réel, sous licence MIT) et des besoins réels qu'elle n'a pas encore couverts.
+(code réel, dépôts publics) et des besoins réels qu'elle n'a pas encore couverts.
 
 Ne s'exécute que sur une base vide. Le compte est créé sans mot de passe
 utilisable, sauf si MFA_AMORCE_EMAIL et MFA_AMORCE_MDP sont définis.
@@ -15,6 +15,30 @@ from .securite import hacher
 PROPRIO_GITHUB = os.environ.get("MFA_AMORCE_GITHUB", "dondirechristian")
 
 CONNECTEURS = [
+    {
+        "slug": "brvm-mcp", "nom": "brvm-mcp", "type": "mcp", "langage": "Python",
+        "categorie": "finance", "service": "BRVM, Bourse régionale des valeurs mobilières (UEMOA)",
+        "pays": ["BJ", "BF", "CI", "GW", "ML", "NE", "SN", "TG"],
+        "resume": "Serveur MCP qui donne aux assistants IA les données publiques de la BRVM : "
+                  "cours, indices, dividendes, volumes, fondamentaux et indices sectoriels.",
+        "description": """La BRVM, bourse commune aux huit pays de l'UEMOA, ne publie aucune API. Ce serveur agrège **4 sources** (brvm.org, AFX Kwayisi, Rich Bourse, Sika Finance) en **18 outils MCP** : un assistant IA peut répondre à « quelles valeurs de la BRVM ont le meilleur rendement du dividende ? » avec des données du jour.
+
+**Ce qu'il couvre**
+
+| Domaine | Outils |
+|---|---|
+| Marché | résumé de séance (BRVM-C, BRVM-30, Prestige), cours des 47 valeurs, OHLC |
+| Sociétés | liste par pays, fiche et documents (rapports annuels, BOC) |
+| Dividendes | prochains paiements, rendement classé, recoupement Sika Finance |
+| Analyse | PER, BPA, capitalisation, volumes, indices sectoriels, historique |
+
+**Le garde-fou réglementaire.** Conseiller en investissement est une activité réglementée par l'AMF-UMOA. Chaque réponse passe par un correcteur éditorial qui bloque le vocabulaire prescriptif (*acheter*, *vendre*, *nous recommandons*, *objectif de cours*). Une réponse fautive est **rejetée, pas réécrite en silence** : la réécrire cacherait la dérive.
+
+**Offres** : gratuit (25 appels par jour en HTTP, illimité en local), Pro et Business avec clé d'API personnelle.""",
+        "installation": "claude mcp add brvm -- uvx --from git+https://github.com/sotechdi/brvm-mcp brvm-mcp",
+        "depot_url": "https://github.com/SOTECHDI/brvm-mcp",
+        "doc_url": "https://sotechdi.github.io/brvm-mcp/",
+    },
     {
         "slug": "momo-xof-mcp", "nom": "momo-xof-mcp", "type": "mcp", "langage": "Python",
         "categorie": "paiement", "service": "Mobile money UEMOA via CinetPay",
@@ -116,8 +140,8 @@ def amorcer() -> None:
                 slug=d["slug"], nom=d["nom"], resume=d["resume"], description=d["description"],
                 installation=d["installation"], categorie=d["categorie"], type=d["type"],
                 langage=d["langage"], service=d["service"], pays="," + ",".join(d["pays"]) + ",",
-                depot_url=f"https://github.com/{PROPRIO_GITHUB}/{d.get('depot', d['slug'])}",
-                auteur_id=dev.id)
+                depot_url=d.get("depot_url") or f"https://github.com/{PROPRIO_GITHUB}/{d.get('depot', d['slug'])}",
+                doc_url=d.get("doc_url", ""), auteur_id=dev.id)
             if os.environ.get("MFA_AMORCE_RELEVE", "1") == "1":
                 relever_github(c)
             s.add(c)

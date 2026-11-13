@@ -31,7 +31,7 @@ prévenir quand l'opérateur change son API : personne ne sait lesquels marchent
   demander « existe-t-il un connecteur Orange Money qui marche au Burkina ? » et obtenir
   la réponse avec son état.
 
-Les premiers connecteurs publiés sont trois serveurs MCP réels de SOTECHDI (licence MIT) :
+Les premiers connecteurs publiés sont quatre serveurs MCP réels de l'équipe : bourse BRVM,
 mobile money XOF, cadastre minier du Burkina Faso, veille des marchés publics.
 
 ## Lancer en local

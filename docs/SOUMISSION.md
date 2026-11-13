@@ -38,7 +38,7 @@ Choix faits pour respecter le règlement : le pilote PostgreSQL habituel (psycop
 
 Aucune ligne de code antérieure au concours n'est intégrée à la plateforme : tout le dépôt `mcp-for-africa` a été créé pendant la durée du concours.
 
-La plateforme **référence** comme premiers contenus de son catalogue trois projets open source (licence MIT) appartenant au représentant de l'équipe et antérieurs au concours : `momo-xof-mcp`, `mining-cadastre-mcp` et `veille-marches-publics-bf`. Ce sont des fiches du catalogue (nom, description, lien vers le dépôt), au même titre que les connecteurs que publieront les utilisateurs ; leur code ne fait pas partie de la solution soumise.
+La plateforme **référence** comme premiers contenus de son catalogue quatre projets appartenant au représentant de l'équipe et antérieurs au concours : `brvm-mcp`, `momo-xof-mcp`, `mining-cadastre-mcp` et `veille-marches-publics-bf`. Ce sont des fiches du catalogue (nom, description, lien vers le dépôt), au même titre que les connecteurs que publieront les utilisateurs ; leur code ne fait pas partie de la solution soumise.
 
 ## Déclaration d'usage de l'intelligence artificielle
 

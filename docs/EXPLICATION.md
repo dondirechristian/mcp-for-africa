@@ -30,7 +30,7 @@ Navigateur ──► FastAPI (app/main.py) ──► SQLAlchemy (app/db.py) ─�
 | `app/agents.py` | Le serveur MCP (protocole JSON-RPC écrit à la main) |
 | `app/securite.py` | Mots de passe, jeton anti-CSRF, limitation des tentatives |
 | `app/referentiel.py` | Les 54 pays, les zones UEMOA/CEMAC, les catégories |
-| `app/amorce.py` | Le contenu de départ (3 connecteurs, 4 demandes), sur base vide uniquement |
+| `app/amorce.py` | Le contenu de départ (4 connecteurs, 4 demandes), sur base vide uniquement |
 | `app/templates/` | Les pages HTML ; `_macros.html` contient les morceaux réutilisés |
 | `tests/` | 10 tests qui rejouent les parcours complets |
 

@@ -29,6 +29,7 @@ PAYS_TRIES = sorted(PAYS.items(), key=lambda kv: kv[1])
 
 CATEGORIES = {
     "paiement": "Paiement & mobile money",
+    "finance": "Finance & bourse",
     "donnees-publiques": "Données publiques",
     "administration": "Administration & état civil",
     "entreprises": "Entreprises, fiscalité & marchés publics",
