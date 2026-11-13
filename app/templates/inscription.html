@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% from "_macros.html" import options_pays %}
-{% block titre %}Rejoindre Relais{% endblock %}
+{% block titre %}Rejoindre MCP for Africa{% endblock %}
 {% block contenu %}
 <div class="formulaire" style="max-width:520px">
-  <h1>Rejoindre Relais</h1>
+  <h1>Rejoindre MCP for Africa</h1>
   <p class="aide">Gratuit. Votre e-mail n'est jamais affiché.</p>
   {% if erreurs %}<ul class="erreurs">{% for e in erreurs %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
   <form method="post" action="/inscription">

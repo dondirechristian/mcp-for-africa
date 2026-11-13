@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% from "_macros.html" import selection_pays, options %}
-{% block titre %}{{ "Publier un connecteur" if nouveau else "Modifier " ~ c.nom }} — Relais{% endblock %}
+{% block titre %}{{ "Publier un connecteur" if nouveau else "Modifier " ~ c.nom }} — MCP for Africa{% endblock %}
 {% block contenu %}
 <div class="formulaire">
   <h1>{{ "Publier un connecteur" if nouveau else "Modifier « " ~ c.nom ~ " »" }}</h1>
@@ -15,7 +15,7 @@
     </div>
     <div class="champ"><label for="resume">Résumé en une phrase</label><input id="resume" name="resume" required maxlength="200" value="{{ c.resume }}" placeholder="Ce qu'il permet de faire, pour qui"></div>
     <div class="champ"><label for="depot_url">Dépôt du code</label><input id="depot_url" name="depot_url" type="url" required value="{{ c.depot_url }}" placeholder="https://github.com/vous/votre-connecteur">
-      <p class="aide">Sur GitHub, Relais relit automatiquement la licence, les tests (GitHub Actions) et le dernier commit.</p></div>
+      <p class="aide">Sur GitHub, MCP for Africa relit automatiquement la licence, les tests (GitHub Actions) et le dernier commit.</p></div>
     <div class="deux">
       <div class="champ"><label for="categorie">Catégorie</label><select id="categorie" name="categorie" required>{{ options(ref.CATEGORIES, c.categorie, "Choisir…") }}</select></div>
       <div class="champ"><label for="type">Type</label><select id="type" name="type" required>{{ options(ref.TYPES, c.type, "Choisir…") }}</select></div>

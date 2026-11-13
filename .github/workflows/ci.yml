@@ -13,7 +13,16 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: pip install -r requirements-dev.txt
-      - name: Tests
-        run: python -m pytest -q
-      - name: Licences interdites (GPL, AGPL, LGPL)
+      - run: python -m pytest -q
+
+  licences:
+    # Environnement de production seul : les outils de test n'entrent pas dans l'application.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt pip-licenses==5.5.5
+      - name: Aucune licence a reciprocite (GPL, AGPL, LGPL, MPL...)
         run: python scripts/verifier_licences.py

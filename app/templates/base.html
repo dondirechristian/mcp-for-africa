@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block titre %}Relais — les connecteurs africains, construits ensemble{% endblock %}</title>
-  <meta name="description" content="{% block description %}Relais : la plateforme où les développeurs africains publient, testent et améliorent ensemble les connecteurs vers les services du continent : mobile money, données publiques, administrations.{% endblock %}">
+  <title>{% block titre %}MCP for Africa — les connecteurs africains, construits ensemble{% endblock %}</title>
+  <meta name="description" content="{% block description %}MCP for Africa : la plateforme où les développeurs africains publient, testent et améliorent ensemble les connecteurs vers les services du continent : mobile money, données publiques, administrations.{% endblock %}">
   <link rel="icon" href="/static/logo.svg" type="image/svg+xml">
   <link rel="preload" href="/static/TwemojiCountryFlags.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/static/style.css?v=2">
@@ -13,7 +13,7 @@
 {% set chemin = request.url.path %}
 <header class="entete">
   <div class="cadre">
-    <a class="logo" href="/"><img src="/static/logo.svg" alt="" width="28" height="28"> Relais</a>
+    <a class="logo" href="/"><img src="/static/logo.svg" alt="" width="28" height="28"> MCP for Africa</a>
     <nav class="nav" aria-label="Navigation principale">
       <a href="/connecteurs" {% if chemin.startswith('/connecteurs') %}aria-current="page"{% endif %}>Connecteurs</a>
       <a href="/demandes" {% if chemin.startswith('/demandes') %}aria-current="page"{% endif %}>Demandes</a>
@@ -39,7 +39,7 @@
 </main>
 <footer class="pied">
   <div class="cadre">
-    <span>Relais — fait au Burkina Faso, pour les devs de tout le continent.</span>
+    <span>MCP for Africa — fait au Burkina Faso, pour les devs de tout le continent.</span>
     <span><a href="/api/connecteurs">API</a> · <a href="/a-propos">Serveur MCP</a> · <a href="/a-propos#ia">Déclaration d'usage de l'IA</a></span>
   </div>
 </footer>

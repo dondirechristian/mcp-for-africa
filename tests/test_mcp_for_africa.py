@@ -1,11 +1,12 @@
 """Parcours complets sur une base SQLite temporaire, sans réseau."""
+import json
 import os
 import re
 import tempfile
 from datetime import timedelta
 
 os.environ["DATABASE_URL"] = "sqlite:///" + os.path.join(tempfile.mkdtemp(), "test.db")
-os.environ["RELAIS_AMORCE_RELEVE"] = "0"  # pas d'appel à GitHub pendant les tests
+os.environ["MFA_AMORCE_RELEVE"] = "0"  # pas d'appel à GitHub pendant les tests
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
@@ -18,7 +19,7 @@ from app.securite import hacher, verifier  # noqa: E402
 
 @pytest.fixture(autouse=True)
 def sans_github(monkeypatch):
-    def faux_releve(c, client=None):
+    def faux_releve(c):
         c.gh_verifie_le = maintenant()
         c.gh_licence, c.gh_ci = "MIT", ""
     monkeypatch.setattr("app.main.relever_github", faux_releve)
@@ -162,4 +163,38 @@ def test_serveur_mcp(client):
     r = client.post("/mcp", headers=entetes, json={
         "jsonrpc": "2.0", "id": 3, "method": "tools/call",
         "params": {"name": "chercher_connecteurs", "arguments": {"pays": "BF", "recherche": "cadastre"}}})
-    assert "mining-cadastre-mcp" in r.text
+    fiches = json.loads(r.json()["result"]["content"][0]["text"])
+    assert [f["slug"] for f in fiches] == ["mining-cadastre-mcp"]
+    # Notification : pas de réponse. Arguments hors schéma : erreur JSON-RPC.
+    assert client.post("/mcp", json={"jsonrpc": "2.0", "method": "notifications/initialized"}).status_code == 202
+    r = client.post("/mcp", json={"jsonrpc": "2.0", "id": 4, "method": "tools/call",
+                                  "params": {"name": "chercher_connecteurs", "arguments": {"pays": 3}}})
+    assert r.json()["error"]["code"] == -32602
+    assert client.post("/mcp", content=b"{pas du json").status_code == 400
+    assert client.get("/mcp").status_code == 405
+
+
+def test_releve_github_sans_reseau(monkeypatch):
+    """Le relevé réel (pas le faux de la fixture) traduit les réponses de l'API GitHub."""
+    import urllib.error
+    reponses = {
+        "/repos/a/b": {"license": {"spdx_id": "MIT"}, "stargazers_count": 4,
+                       "pushed_at": "2026-11-01T10:00:00Z", "archived": False, "default_branch": "main"},
+        "/repos/a/b/actions/runs": {"workflow_runs": [{"conclusion": "cancelled"}, {"conclusion": "success"}]},
+    }
+
+    def faux_api(chemin, params=None):
+        if chemin not in reponses:
+            raise urllib.error.HTTPError(chemin, 404, "Not Found", {}, None)
+        return reponses[chemin]
+
+    monkeypatch.setattr(module_etat, "_api_github", faux_api)
+    c = Connecteur(depot_url="https://github.com/a/b")
+    module_etat.relever_github(c)
+    assert (c.gh_licence, c.gh_ci, c.gh_etoiles, c.gh_erreur) == ("MIT", "success", 4, "")
+    c = Connecteur(depot_url="https://github.com/a/inconnu")
+    module_etat.relever_github(c)
+    assert c.gh_erreur == "Dépôt introuvable ou privé."
+    c = Connecteur(depot_url="https://gitlab.com/a/b")
+    module_etat.relever_github(c)
+    assert "hors GitHub" in c.gh_erreur

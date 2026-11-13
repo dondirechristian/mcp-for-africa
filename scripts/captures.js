@@ -11,7 +11,7 @@ for (const [nom, url, l, h] of pages) {
   const sortie = path.join(dossier, nom + '.png');
   execFileSync('C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', [
     '--headless=new', '--disable-gpu', '--hide-scrollbars', `--window-size=${l},${h}`,
-    `--user-data-dir=${process.env.TEMP}\\edge-relais`, `--screenshot=${sortie}`, base + url,
+    `--user-data-dir=${process.env.TEMP}\\edge-mfa`, `--screenshot=${sortie}`, base + url,
   ], { stdio: 'ignore', timeout: 60000 });
   console.log(sortie);
 }

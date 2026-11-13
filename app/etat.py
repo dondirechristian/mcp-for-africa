@@ -6,11 +6,13 @@ sources indépendantes, et dit toujours pourquoi :
   - le dépôt : tests (GitHub Actions), dernier commit, archivage ;
   - la communauté : les derniers essais « ça marche / ça ne marche pas ».
 """
+import json
 import os
 import re
+import urllib.error
+import urllib.parse
+import urllib.request
 from datetime import datetime, timedelta
-
-import httpx
 
 from .db import Connecteur, Essai, maintenant
 from .referentiel import LICENCES_COPYLEFT
@@ -37,47 +39,42 @@ def releve_a_faire(c: Connecteur) -> bool:
         c.gh_verifie_le is None or maintenant() - c.gh_verifie_le > FRAICHEUR)
 
 
-def relever_github(c: Connecteur, client: httpx.Client | None = None) -> None:
+def _api_github(chemin: str, params: dict | None = None) -> dict:
+    url = "https://api.github.com" + chemin + ("?" + urllib.parse.urlencode(params) if params else "")
+    entetes = {"Accept": "application/vnd.github+json", "User-Agent": "mcp-for-africa"}
+    if os.environ.get("GITHUB_TOKEN"):
+        entetes["Authorization"] = "Bearer " + os.environ["GITHUB_TOKEN"]
+    with urllib.request.urlopen(urllib.request.Request(url, headers=entetes), timeout=8) as r:
+        return json.loads(r.read().decode())
+
+
+def relever_github(c: Connecteur) -> None:
     """Met à jour les champs gh_* du connecteur. Ne lève jamais : l'erreur est stockée."""
     depot = depot_github(c.depot_url)
     c.gh_verifie_le = maintenant()
     if not depot:
         c.gh_erreur = "Dépôt hors GitHub : relevé automatique indisponible."
         return
-    entetes = {"Accept": "application/vnd.github+json", "User-Agent": "relais-connecteurs"}
-    if os.environ.get("GITHUB_TOKEN"):
-        entetes["Authorization"] = "Bearer " + os.environ["GITHUB_TOKEN"]
-    proprio = client is None
-    client = client or httpx.Client(timeout=8, headers=entetes)
+    chemin = f"/repos/{depot[0]}/{depot[1]}"
     try:
-        r = client.get(f"https://api.github.com/repos/{depot[0]}/{depot[1]}", headers=entetes)
-        if r.status_code == 404:
-            c.gh_erreur = "Dépôt introuvable ou privé."
-            return
-        if r.status_code != 200:
-            c.gh_erreur = f"GitHub a répondu {r.status_code}, nouvel essai plus tard."
-            return
-        d = r.json()
+        d = _api_github(chemin)
         c.gh_licence = ((d.get("license") or {}).get("spdx_id") or "").replace("NOASSERTION", "")
         c.gh_etoiles = int(d.get("stargazers_count") or 0)
         c.gh_dernier_push = _date_iso(d.get("pushed_at"))
         c.gh_archive = bool(d.get("archived"))
         c.gh_ci = ""
-        branche = d.get("default_branch") or "main"
-        r2 = client.get(f"https://api.github.com/repos/{depot[0]}/{depot[1]}/actions/runs",
-                        params={"branch": branche, "per_page": 5, "status": "completed"},
-                        headers=entetes)
-        if r2.status_code == 200:
-            for run in r2.json().get("workflow_runs", []):
-                if run.get("conclusion") in ("success", "failure"):
-                    c.gh_ci = run["conclusion"]
-                    break
+        runs = _api_github(chemin + "/actions/runs", {"branch": d.get("default_branch") or "main",
+                                                      "per_page": 5, "status": "completed"})
+        for run in runs.get("workflow_runs", []):
+            if run.get("conclusion") in ("success", "failure"):
+                c.gh_ci = run["conclusion"]
+                break
         c.gh_erreur = ""
-    except httpx.HTTPError:
+    except urllib.error.HTTPError as e:
+        c.gh_erreur = ("Dépôt introuvable ou privé." if e.code == 404
+                       else f"GitHub a répondu {e.code}, nouvel essai plus tard.")
+    except (urllib.error.URLError, TimeoutError, ValueError, OSError):
         c.gh_erreur = "GitHub injoignable, nouvel essai plus tard."
-    finally:
-        if proprio:
-            client.close()
 
 
 def etat(c: Connecteur, essais: list[Essai]) -> dict:

@@ -13,7 +13,7 @@ Conformément au règlement de la CADEV 2026, l'équipe déclare l'usage suivant
 
 **Œuvre de l'équipe** : choix du sujet et du concept (connecteurs africains à état vivant),
 les trois connecteurs d'origine et leur documentation, les demandes initiales (besoins réels
-de SOTECHDI), la relecture, les essais et le déploiement.
+du représentant de l'équipe), la relecture, les essais et le déploiement.
 
 **Traçabilité** : les commits produits avec l'assistant portent la mention
 `Co-Authored-By: Claude`.

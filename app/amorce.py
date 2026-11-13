@@ -2,7 +2,7 @@
 (code réel, sous licence MIT) et des besoins réels qu'elle n'a pas encore couverts.
 
 Ne s'exécute que sur une base vide. Le compte est créé sans mot de passe
-utilisable, sauf si RELAIS_AMORCE_EMAIL et RELAIS_AMORCE_MDP sont définis.
+utilisable, sauf si MFA_AMORCE_EMAIL et MFA_AMORCE_MDP sont définis.
 """
 import os
 
@@ -12,7 +12,7 @@ from .db import Connecteur, Demande, Dev, Soutien, session
 from .etat import relever_github
 from .securite import hacher
 
-PROPRIO_GITHUB = os.environ.get("RELAIS_AMORCE_GITHUB", "dondirechristian")
+PROPRIO_GITHUB = os.environ.get("MFA_AMORCE_GITHUB", "dondirechristian")
 
 CONNECTEURS = [
     {
@@ -102,8 +102,8 @@ def amorcer() -> None:
     try:
         if s.scalar(select(func.count(Connecteur.id))):
             return
-        email = os.environ.get("RELAIS_AMORCE_EMAIL", "amorce@relais.invalid")
-        mdp = os.environ.get("RELAIS_AMORCE_MDP")
+        email = os.environ.get("MFA_AMORCE_EMAIL", "amorce@mcp-for-africa.invalid")
+        mdp = os.environ.get("MFA_AMORCE_MDP")
         dev = s.scalar(select(Dev).where(Dev.pseudo == "sotechdi"))
         if not dev:
             dev = Dev(pseudo="sotechdi", email=email.lower(), mdp=hacher(mdp) if mdp else "!",
@@ -118,7 +118,7 @@ def amorcer() -> None:
                 langage=d["langage"], service=d["service"], pays="," + ",".join(d["pays"]) + ",",
                 depot_url=f"https://github.com/{PROPRIO_GITHUB}/{d.get('depot', d['slug'])}",
                 auteur_id=dev.id)
-            if os.environ.get("RELAIS_AMORCE_RELEVE", "1") == "1":
+            if os.environ.get("MFA_AMORCE_RELEVE", "1") == "1":
                 relever_github(c)
             s.add(c)
         for titre, cat, pays, texte in DEMANDES:

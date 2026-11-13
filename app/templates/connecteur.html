@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% from "_macros.html" import badge_etat, drapeaux, fil, options_pays %}
-{% block titre %}{{ c.nom }} — Relais{% endblock %}
+{% block titre %}{{ c.nom }} — MCP for Africa{% endblock %}
 {% block description %}{{ c.resume }}{% endblock %}
 {% block contenu %}
 <div class="sous" style="margin-bottom:8px"><a href="/connecteurs">Connecteurs</a> › {{ ref.CATEGORIES.get(c.categorie) }}</div>
@@ -126,7 +126,7 @@
 
     <section class="panneau">
       <h3>Pour un agent IA</h3>
-      <p class="aide">Cette fiche est aussi servie en JSON et par le serveur MCP de Relais.</p>
+      <p class="aide">Cette fiche est aussi servie en JSON et par le serveur MCP de MCP for Africa.</p>
       <a href="/api/connecteurs/{{ c.slug }}">/api/connecteurs/{{ c.slug }}</a>
     </section>
   </aside>

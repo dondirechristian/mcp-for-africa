@@ -1,4 +1,4 @@
-"""Relais — les connecteurs africains, construits ensemble."""
+"""MCP for Africa — les connecteurs africains, construits ensemble."""
 import contextlib
 import os
 import re
@@ -25,7 +25,7 @@ from .securite import Limiteur, csrf_valide, hacher, jeton_csrf, verifier
 
 ICI = Path(__file__).parent
 SECRET = os.environ.get("SECRET_KEY") or "dev-local-seulement-changer-en-production"
-EN_PROD = os.environ.get("RELAIS_ENV") == "production"
+EN_PROD = os.environ.get("MFA_ENV") == "production"
 if EN_PROD and SECRET.startswith("dev-local"):
     raise RuntimeError("SECRET_KEY doit être défini en production.")
 
@@ -36,22 +36,20 @@ limite_ecriture = Limiteur(40, 600)
 @contextlib.asynccontextmanager
 async def cycle_de_vie(app: FastAPI):
     creer_tables()
-    if os.environ.get("RELAIS_AMORCE", "1") == "1":
+    if os.environ.get("MFA_AMORCE", "1") == "1":
         from .amorce import amorcer
         amorcer()
-    from .agents import serveur_mcp
-    async with serveur_mcp.session_manager.run():
-        yield
+    yield
 
 
-app = FastAPI(title="Relais", lifespan=cycle_de_vie, docs_url="/api/docs", redoc_url=None)
+app = FastAPI(title="MCP for Africa", lifespan=cycle_de_vie, docs_url="/api/docs", redoc_url=None)
 app.add_middleware(SessionMiddleware, secret_key=SECRET, max_age=30 * 24 * 3600,
-                   same_site="lax", https_only=EN_PROD, session_cookie="relais")
+                   same_site="lax", https_only=EN_PROD, session_cookie="mfa_session")
 app.mount("/static", StaticFiles(directory=ICI / "static"), name="static")
 
 # Le serveur MCP de la plateforme elle-même, sur /mcp (voir agents.py).
-from .agents import routes_mcp  # noqa: E402
-app.router.routes.extend(routes_mcp())
+from .agents import routeur as routeur_mcp  # noqa: E402
+app.include_router(routeur_mcp)
 
 gabarits = Jinja2Templates(directory=ICI / "templates")
 _md = MarkdownIt("commonmark", {"html": False, "linkify": False, "breaks": True}).enable("table")

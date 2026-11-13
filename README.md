@@ -1,4 +1,4 @@
-# Relais
+# MCP for Africa
 
 **La plateforme où les développeurs africains publient, essaient et réparent ensemble
 les connecteurs vers les services du continent** : mobile money, données publiques,
@@ -14,7 +14,7 @@ journal officiel en PDF refait le même travail que des centaines d'autres avant
 découvre les mêmes pièges, seul. Les rares connecteurs partagés sur GitHub cassent sans
 prévenir quand l'opérateur change son API : personne ne sait lesquels marchent encore.
 
-## Ce que fait Relais
+## Ce que fait MCP for Africa
 
 - **Catalogue de connecteurs** : serveurs MCP, SDK, clients d'API, extracteurs de documents,
   filtrables par pays (54), zone (UEMOA, CEMAC), catégorie et état.
@@ -55,9 +55,9 @@ Service web Python ou Docker, depuis ce dépôt (`Dockerfile` fourni).
 | `DATABASE_URL` | URL PostgreSQL (`postgres://…` accepté, le pilote pg8000 est imposé) |
 | `DATABASE_SSL` | `1` si la base exige TLS |
 | `SECRET_KEY` | Clé de signature des sessions (obligatoire en production) |
-| `RELAIS_ENV` | `production` (cookies sécurisés) |
+| `MFA_ENV` | `production` (cookies sécurisés) |
 | `GITHUB_TOKEN` | Facultatif : relève la limite de l'API GitHub (60 → 5000 requêtes/h) |
-| `RELAIS_AMORCE_EMAIL`, `RELAIS_AMORCE_MDP` | Identifiants du compte d'amorçage `sotechdi` |
+| `MFA_AMORCE_EMAIL`, `MFA_AMORCE_MDP` | Identifiants du compte d'amorçage `sotechdi` |
 
 Commande de démarrage hors Docker :
 `uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips='*'`
