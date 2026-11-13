@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% from "_macros.html" import carte_connecteur, options_pays, options %}
+{% block titre %}Connecteurs — Relais{% endblock %}
+{% block contenu %}
+<div class="section-tete">
+  <h1>Connecteurs</h1>
+  <a class="btn" href="/connecteurs/nouveau">Publier un connecteur</a>
+</div>
+<form class="filtres" method="get" action="/connecteurs" role="search">
+  <label class="sr" for="q">Rechercher</label>
+  <input id="q" type="search" name="q" value="{{ f.q }}" placeholder="Orange Money, cadastre, Wave, état civil…">
+  <label class="sr" for="pays">Pays</label>
+  <select id="pays" name="pays">{{ options_pays(f.pays) }}</select>
+  <label class="sr" for="categorie">Catégorie</label>
+  <select id="categorie" name="categorie">{{ options(ref.CATEGORIES, f.categorie, "Toutes les catégories") }}</select>
+  <label class="sr" for="type">Type</label>
+  <select id="type" name="type">{{ options(ref.TYPES, f.type, "Tous les types") }}</select>
+  <label class="sr" for="etat">État</label>
+  <select id="etat" name="etat">{{ options({"vivant": "Vivant", "a-verifier": "À vérifier", "casse": "Signalé cassé"}, f.etat, "Tous les états") }}</select>
+  <button class="btn second" type="submit">Filtrer</button>
+</form>
+<p class="aide">{{ connecteurs|length }} connecteur(s).</p>
+{% if connecteurs %}
+<div class="grille">{% for c in connecteurs %}{{ carte_connecteur(c, etats[c.id]) }}{% endfor %}</div>
+{% else %}
+<div class="vide-etat">
+  <p>Rien ne correspond. Personne ne l'a encore fait, ou personne ne l'a encore partagé.</p>
+  <a class="btn" href="/demandes/nouvelle">Demander ce connecteur</a>
+</div>
+{% endif %}
+{% endblock %}

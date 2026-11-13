@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% from "_macros.html" import selection_pays, options %}
+{% block titre %}{{ "Publier un connecteur" if nouveau else "Modifier " ~ c.nom }} — Relais{% endblock %}
+{% block contenu %}
+<div class="formulaire">
+  <h1>{{ "Publier un connecteur" if nouveau else "Modifier « " ~ c.nom ~ " »" }}</h1>
+  {% if demande %}<div class="flash ok">Vous répondez à la demande « <a href="/demandes/{{ demande.id }}">{{ demande.titre }}</a> ». Elle sera marquée résolue à la publication.</div>{% endif %}
+  {% if erreurs %}<ul class="erreurs">{% for e in erreurs %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+  <form method="post" action="{{ '/connecteurs/nouveau' if nouveau else '/connecteurs/' ~ c.slug ~ '/modifier' }}">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    {% if demande %}<input type="hidden" name="demande" value="{{ demande.id }}">{% endif %}
+    <div class="deux">
+      <div class="champ"><label for="nom">Nom</label><input id="nom" name="nom" required maxlength="80" value="{{ c.nom }}" placeholder="orange-money-bf-mcp"></div>
+      <div class="champ"><label for="service">Service visé</label><input id="service" name="service" maxlength="120" value="{{ c.service }}" placeholder="Orange Money Burkina, API Wave…"></div>
+    </div>
+    <div class="champ"><label for="resume">Résumé en une phrase</label><input id="resume" name="resume" required maxlength="200" value="{{ c.resume }}" placeholder="Ce qu'il permet de faire, pour qui"></div>
+    <div class="champ"><label for="depot_url">Dépôt du code</label><input id="depot_url" name="depot_url" type="url" required value="{{ c.depot_url }}" placeholder="https://github.com/vous/votre-connecteur">
+      <p class="aide">Sur GitHub, Relais relit automatiquement la licence, les tests (GitHub Actions) et le dernier commit.</p></div>
+    <div class="deux">
+      <div class="champ"><label for="categorie">Catégorie</label><select id="categorie" name="categorie" required>{{ options(ref.CATEGORIES, c.categorie, "Choisir…") }}</select></div>
+      <div class="champ"><label for="type">Type</label><select id="type" name="type" required>{{ options(ref.TYPES, c.type, "Choisir…") }}</select></div>
+    </div>
+    <div class="deux">
+      <div class="champ"><label for="langage">Langage</label><select id="langage" name="langage"><option value="">—</option>{% for l in ref.LANGAGES %}<option {% if l == c.langage %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+      <div class="champ"><label for="doc_url">Documentation (facultatif)</label><input id="doc_url" name="doc_url" type="url" value="{{ c.doc_url }}"></div>
+    </div>
+    <div class="champ"><label>Pays couverts</label>{{ selection_pays("pays", c.codes_pays) }}</div>
+    <div class="champ"><label for="description">Description</label>
+      <textarea id="description" name="description" rows="10" placeholder="Ce qu'il sait faire, ce qu'il ne sait pas faire, et surtout les pièges du service que vous avez découverts.">{{ c.description }}</textarea>
+      <p class="aide">Markdown accepté. Les pièges rencontrés sont ce que les autres devs cherchent le plus.</p></div>
+    <div class="champ"><label for="installation">Installation</label>
+      <textarea id="installation" name="installation" rows="4" style="font-family:var(--mono)" placeholder="pip install …">{{ c.installation }}</textarea></div>
+    <button class="btn" type="submit">{{ "Publier" if nouveau else "Enregistrer" }}</button>
+    <a class="btn discret" href="{{ '/connecteurs' if nouveau else '/connecteurs/' ~ c.slug }}">Annuler</a>
+  </form>
+</div>
+{% endblock %}

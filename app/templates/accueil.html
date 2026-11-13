@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% from "_macros.html" import carte_connecteur, drapeaux %}
+{% block contenu %}
+<section class="heros">
+  <div>
+    <div class="surtitre">Par les devs africains, pour les devs africains</div>
+    <h1>Arrêtons d'écrire chacun dans notre coin la même intégration Orange Money.</h1>
+    <p class="chapeau">Relais est l'endroit où l'on <strong>publie</strong>, <strong>essaie</strong> et <strong>répare ensemble</strong> les connecteurs vers les services du continent : mobile money, données publiques, administrations, télécoms. Chaque connecteur affiche s'il marche encore, d'après les essais de la communauté et ses tests automatiques.</p>
+    <div class="actions">
+      <a class="btn" href="/connecteurs">Trouver un connecteur</a>
+      <a class="btn second" href="/demandes">Voir ce qui manque</a>
+    </div>
+  </div>
+  <div class="illustration" aria-label="Exemple d'états de connecteurs">
+    <div class="surtitre" style="color:var(--texte-3)">Exemple d'affichage</div>
+    <div class="rang"><span>🇧🇫 Paiement Orange Money (UEMOA)</span><span class="badge vivant"><span class="point"></span>Vivant</span></div>
+    <div class="rang"><span>🇸🇳 Paiement Wave en direct</span><span class="badge ocre">Demandé</span></div>
+    <div class="rang"><span>🇨🇮 Registre du commerce</span><span class="badge a-verifier"><span class="point"></span>À vérifier</span></div>
+    <div class="rang"><span>🇳🇬 Identité NIN</span><span class="badge casse"><span class="point"></span>Signalé cassé</span></div>
+    <p class="aide" style="margin:10px 0 0">Les APIs africaines changent sans prévenir. Ici, celui qui tombe en panne le dit, et celui qui répare le signale.</p>
+  </div>
+</section>
+
+<div class="chiffres">
+  <div class="chiffre"><b>{{ chiffres.connecteurs }}</b><span>connecteurs</span></div>
+  <div class="chiffre"><b>{{ chiffres.pays }}</b><span>pays couverts sur 54</span></div>
+  <div class="chiffre"><b>{{ chiffres.devs }}</b><span>devs inscrits</span></div>
+  <div class="chiffre"><b>{{ chiffres.essais }}</b><span>essais partagés</span></div>
+  <div class="chiffre"><b>{{ chiffres.demandes }}</b><span>besoins en attente</span></div>
+</div>
+
+<section class="section">
+  <h2>Comment ça marche</h2>
+  <ol class="etapes">
+    <li><h3>Publiez votre connecteur</h3><p>Un serveur MCP, un SDK, un extracteur de PDF officiel : vous donnez le dépôt, Relais relit sa licence, ses tests et son activité.</p></li>
+    <li><h3>Dites si ça marche chez vous</h3><p>Un essai, c'est un dev, un pays, une date. Un échec avec une phrase d'explication vaut de l'or pour celui qui répare.</p></li>
+    <li><h3>Prenez une demande</h3><p>Les besoins non couverts sont listés et soutenus. Prenez-en un, publiez le connecteur, et tous ceux qui l'attendaient le trouvent.</p></li>
+  </ol>
+</section>
+
+<section class="section">
+  <div class="section-tete"><h2>Derniers connecteurs</h2><a href="/connecteurs">Tout voir →</a></div>
+  {% if recents %}
+  <div class="grille">{% for c in recents %}{{ carte_connecteur(c, etats[c.id]) }}{% endfor %}</div>
+  {% else %}<div class="vide-etat">Aucun connecteur pour l'instant. <a href="/connecteurs/nouveau">Publiez le premier.</a></div>{% endif %}
+</section>
+
+<section class="section">
+  <div class="section-tete"><h2>Ce que la communauté attend</h2><a href="/demandes">Toutes les demandes →</a></div>
+  <div class="panneau">
+    <ul class="liste">
+      {% for d, n in demandes %}
+      <li class="ligne-demande">
+        <div class="soutien"><span class="badge ocre">▲ {{ n }}</span></div>
+        <div class="corps">
+          <h3 style="margin:0 0 2px"><a href="/demandes/{{ d.id }}">{{ d.titre }}</a></h3>
+          <div class="sous">{{ drapeaux(d.codes_pays) }} · {{ ref.CATEGORIES.get(d.categorie) }}{% if d.statut == 'en-cours' %} · <span class="badge a-verifier">pris par {{ d.preneur.pseudo }}</span>{% endif %}</div>
+        </div>
+      </li>
+      {% else %}<li>Aucune demande ouverte.</li>{% endfor %}
+    </ul>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-tete"><h2>Où en est le continent</h2><a href="/carte">Voir la carte complète →</a></div>
+  <p class="aide">{{ cov.par_pays|length }} pays sur 54 ont au moins un connecteur. Chaque pays vide est une occasion de devenir la référence locale.</p>
+</section>
+{% endblock %}

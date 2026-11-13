@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block titre %}Connexion — Relais{% endblock %}
+{% block contenu %}
+<div class="formulaire" style="max-width:440px">
+  <h1>Connexion</h1>
+  {% if erreur %}<ul class="erreurs"><li>{{ erreur }}</li></ul>{% endif %}
+  <form method="post" action="/connexion">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <input type="hidden" name="suite" value="{{ suite }}">
+    <div class="champ"><label for="identifiant">Pseudo ou e-mail</label><input id="identifiant" name="identifiant" required autocomplete="username"></div>
+    <div class="champ"><label for="mdp">Mot de passe</label><input id="mdp" name="mdp" type="password" required autocomplete="current-password"></div>
+    <button class="btn" type="submit">Se connecter</button>
+  </form>
+  <p style="margin-top:16px">Pas encore de compte ? <a href="/inscription">Rejoindre Relais</a></p>
+</div>
+{% endblock %}

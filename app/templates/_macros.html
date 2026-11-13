@@ -1,0 +1,71 @@
+{% macro badge_etat(e) -%}
+<span class="badge {{ e.niveau }}" title="{{ e.raisons|join(' ') }}"><span class="point"></span>{{ e.libelle }}</span>
+{%- endmacro %}
+
+{% macro drapeaux(codes, max=6) -%}
+<span class="drapeaux" title="{{ codes|map('nom_pays')|join(', ') }}">{% for c in codes[:max] %}{{ c|drapeau }}{% endfor %}{% if codes|length > max %} +{{ codes|length - max }}{% endif %}</span>
+{%- endmacro %}
+
+{% macro carte_connecteur(c, e) -%}
+<article class="carte">
+  <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+    <span class="badge">{{ ref.TYPES.get(c.type, c.type) }}</span>
+    {{ badge_etat(e) }}
+  </div>
+  <h3><a href="/connecteurs/{{ c.slug }}">{{ c.nom }}</a></h3>
+  {% if c.service %}<div class="sous">{{ c.service }}</div>{% endif %}
+  <p>{{ c.resume }}</p>
+  <div class="bas">
+    {{ drapeaux(c.codes_pays) }}
+    <span>· {{ ref.CATEGORIES.get(c.categorie, c.categorie) }}</span>
+    {% if c.langage %}<span>· {{ c.langage }}</span>{% endif %}
+  </div>
+</article>
+{%- endmacro %}
+
+{% macro selection_pays(nom, choisis, zones=True) -%}
+{% if zones %}
+<div class="aide" style="margin-bottom:6px">Raccourcis :
+  {% for z, codes in ref.ZONES.items() %}<label style="display:inline-flex;gap:4px;font-weight:500;margin-right:10px"><input type="checkbox" name="{{ nom }}" value="{{ z }}" style="width:auto;min-height:0"> toute la zone {{ z }}</label>{% endfor %}
+</div>
+{% endif %}
+<div class="choix-pays">
+  {% for code, libelle in ref.PAYS_TRIES %}
+  <label><input type="checkbox" name="{{ nom }}" value="{{ code }}" {% if code in choisis %}checked{% endif %}> {{ code|drapeau }} {{ libelle }}</label>
+  {% endfor %}
+</div>
+{%- endmacro %}
+
+{% macro options_pays(choisi, vide="Tous les pays") -%}
+<option value="">{{ vide }}</option>
+{% for code, libelle in ref.PAYS_TRIES %}<option value="{{ code }}" {% if code == choisi %}selected{% endif %}>{{ code|drapeau }} {{ libelle }}</option>{% endfor %}
+{%- endmacro %}
+
+{% macro options(dico, choisi, vide) -%}
+<option value="">{{ vide }}</option>
+{% for k, v in dico.items() %}<option value="{{ k }}" {% if k == choisi %}selected{% endif %}>{{ v }}</option>{% endfor %}
+{%- endmacro %}
+
+{% macro fil(messages, action, csrf, moi, chemin) -%}
+<section class="panneau" id="discussion">
+  <h2>Discussion</h2>
+  {% for m in messages %}
+  <div class="message">
+    <div class="qui"><span class="avatar">{{ m.dev.pseudo[:1]|upper }}</span> <a href="/devs/{{ m.dev.pseudo }}">{{ m.dev.pseudo }}</a> {{ m.dev.pays|drapeau }} · {{ m.le|il_y_a }}</div>
+    <div class="contenu">{{ m.texte|md }}</div>
+  </div>
+  {% else %}
+  <p class="aide">Pas encore de message. Une question, une astuce, un piège rencontré ? Écrivez-le ici.</p>
+  {% endfor %}
+  {% if moi %}
+  <form method="post" action="{{ action }}" style="margin-top:14px">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label for="texte" class="sr">Votre message</label>
+    <textarea id="texte" name="texte" required minlength="2" maxlength="5000" placeholder="Votre message (Markdown accepté : `code`, **gras**, listes)"></textarea>
+    <div style="margin-top:8px"><button class="btn" type="submit">Publier</button></div>
+  </form>
+  {% else %}
+  <p><a href="/connexion?suite={{ chemin }}">Connectez-vous</a> pour participer.</p>
+  {% endif %}
+</section>
+{%- endmacro %}

@@ -1,0 +1,11 @@
+fastapi==0.162.7
+uvicorn[standard]==0.54.0
+Jinja2==3.1.6
+SQLAlchemy==2.1.8
+# Pilote PostgreSQL sous licence BSD : psycopg (LGPL) est exclu par le règlement CADEV.
+pg8000==1.31.6
+python-multipart==0.0.33
+itsdangerous==2.2.0
+httpx==0.28.1
+markdown-it-py==4.3.0
+mcp==1.30.0

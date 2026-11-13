@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% from "_macros.html" import carte_connecteur %}
+{% block titre %}{{ d.pseudo }} — Relais{% endblock %}
+{% block contenu %}
+<div class="section-tete">
+  <div>
+    <h1 style="margin-bottom:4px"><span class="avatar" style="width:40px;height:40px;font-size:1.1rem">{{ d.pseudo[:1]|upper }}</span> {{ d.pseudo }}</h1>
+    <div class="sous">{{ d.pays|drapeau }} {{ d.pays|nom_pays }} · membre {{ d.cree_le|il_y_a }}
+      {% if d.github %} · <a href="https://github.com/{{ d.github }}" rel="nofollow noopener" target="_blank">github.com/{{ d.github }}</a>{% endif %}
+      · <span class="badge ocre">{{ points }} points</span></div>
+  </div>
+  {% if moi and moi.id == d.id %}<a class="btn discret" href="/profil">Modifier mon profil</a>{% endif %}
+</div>
+{% if d.bio %}<p style="max-width:46em">{{ d.bio }}</p>{% endif %}
+
+<section class="section">
+  <h2>Connecteurs publiés ({{ publies|length }})</h2>
+  {% if publies %}<div class="grille">{% for c in publies %}{{ carte_connecteur(c, etats[c.id]) }}{% endfor %}</div>
+  {% else %}<p class="aide">Aucun pour l'instant.</p>{% endif %}
+</section>
+{% if contribue %}
+<section class="section">
+  <h2>Contribue à</h2>
+  <div class="grille">{% for c in contribue %}{{ carte_connecteur(c, etats[c.id]) }}{% endfor %}</div>
+</section>
+{% endif %}
+{% if resolues %}
+<section class="section">
+  <h2>Demandes résolues</h2>
+  <ul>{% for x in resolues %}<li><a href="/demandes/{{ x.id }}">{{ x.titre }}</a></li>{% endfor %}</ul>
+</section>
+{% endif %}
+{% if essais %}
+<section class="section">
+  <h2>Derniers essais</h2>
+  <ul class="liste panneau">{% for e in essais %}
+    <li><span class="badge {{ 'vivant' if e.marche else 'casse' }}">{{ "Ça marche" if e.marche else "Ça ne marche pas" }}</span>
+      <a href="/connecteurs/{{ e.connecteur.slug }}">{{ e.connecteur.nom }}</a> · {{ e.pays|drapeau }} · {{ e.le|il_y_a }}</li>{% endfor %}</ul>
+</section>
+{% endif %}
+{% endblock %}

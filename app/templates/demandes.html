@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% from "_macros.html" import drapeaux, options_pays, options %}
+{% block titre %}Demandes — Relais{% endblock %}
+{% block contenu %}
+<div class="section-tete">
+  <div><h1>Demandes</h1><p class="aide" style="margin:0">Les connecteurs qui manquent encore. Soutenez ceux dont vous avez besoin, prenez-en un si vous savez le faire.</p></div>
+  <a class="btn" href="/demandes/nouvelle">Exprimer un besoin</a>
+</div>
+<form class="filtres" method="get" action="/demandes">
+  <select name="statut" aria-label="Statut">
+    {% for k, v in {"ouvertes": "Non résolues", "resolues": "Résolues", "toutes": "Toutes"}.items() %}<option value="{{ k }}" {% if k == f.statut %}selected{% endif %}>{{ v }}</option>{% endfor %}
+  </select>
+  <select name="pays" aria-label="Pays">{{ options_pays(f.pays) }}</select>
+  <select name="categorie" aria-label="Catégorie">{{ options(ref.CATEGORIES, f.categorie, "Toutes les catégories") }}</select>
+  <button class="btn second" type="submit">Filtrer</button>
+</form>
+<div class="panneau">
+  <ul class="liste">
+  {% for d, n in lignes %}
+    <li class="ligne-demande">
+      <div class="soutien">
+        {% if moi %}
+        <form method="post" action="/demandes/{{ d.id }}/soutenir">
+          <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="retour" value="{{ request.url.path }}?{{ request.url.query }}">
+          <button class="btn {{ '' if d.id in soutenues else 'second' }} petit" type="submit" title="{{ 'Retirer mon soutien' if d.id in soutenues else 'Moi aussi j\'en ai besoin' }}">▲<b>{{ n }}</b></button>
+        </form>
+        {% else %}<span class="badge ocre">▲ {{ n }}</span>{% endif %}
+      </div>
+      <div class="corps">
+        <h3 style="margin:0 0 2px"><a href="/demandes/{{ d.id }}">{{ d.titre }}</a></h3>
+        <div class="sous">
+          {{ drapeaux(d.codes_pays) }} · {{ ref.CATEGORIES.get(d.categorie) }} · par {{ d.auteur.pseudo }} {{ d.cree_le|il_y_a }}
+          {% if d.statut == 'en-cours' %}<span class="badge a-verifier">pris par {{ d.preneur.pseudo }}</span>{% endif %}
+          {% if d.statut == 'resolue' and d.connecteur %}<span class="badge vivant">résolu : {{ d.connecteur.nom }}</span>{% endif %}
+        </div>
+      </div>
+    </li>
+  {% else %}
+    <li class="vide-etat">Aucune demande ici. <a href="/demandes/nouvelle">Exprimez la première.</a></li>
+  {% endfor %}
+  </ul>
+</div>
+{% endblock %}

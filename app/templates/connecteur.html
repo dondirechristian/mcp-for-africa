@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge_etat, drapeaux, fil, options_pays %}
+{% block titre %}{{ c.nom }} — Relais{% endblock %}
+{% block description %}{{ c.resume }}{% endblock %}
+{% block contenu %}
+<div class="sous" style="margin-bottom:8px"><a href="/connecteurs">Connecteurs</a> › {{ ref.CATEGORIES.get(c.categorie) }}</div>
+<div class="section-tete">
+  <div>
+    <h1 style="margin-bottom:6px">{{ c.nom }}</h1>
+    <div class="sous">
+      <span class="badge">{{ ref.TYPES.get(c.type, c.type) }}</span>
+      {% if c.langage %}<span class="badge">{{ c.langage }}</span>{% endif %}
+      {{ badge_etat(e) }}
+    </div>
+  </div>
+  {% if modifiable %}<a class="btn discret" href="/connecteurs/{{ c.slug }}/modifier">Modifier la fiche</a>{% endif %}
+</div>
+<p class="chapeau" style="font-size:1.1rem;color:var(--texte-2);max-width:48em">{{ c.resume }}</p>
+
+<div class="mise-en-page">
+  <div>
+    <div class="etat-bloc {{ e.niveau }}">
+      <strong>{{ e.libelle }}</strong>
+      <ul>{% for r in e.raisons %}<li>{{ r }}</li>{% endfor %}</ul>
+    </div>
+    {% if copyleft %}
+    <div class="alerte">Licence <strong>{{ c.gh_licence }}</strong> : copyleft fort. L'embarquer peut vous obliger à publier votre propre code sous la même licence.</div>
+    {% endif %}
+
+    {% if c.description %}<section class="panneau contenu">{{ c.description|md }}</section>{% endif %}
+
+    {% if c.installation %}
+    <section class="panneau">
+      <h2>Installation</h2>
+      <pre><code>{{ c.installation }}</code></pre>
+    </section>
+    {% endif %}
+
+    <section class="panneau" id="essais">
+      <h2>Essais de la communauté</h2>
+      {% for x in essais %}
+      <div class="message">
+        <div class="qui">
+          <span class="badge {{ 'vivant' if x.marche else 'casse' }}">{{ "Ça marche" if x.marche else "Ça ne marche pas" }}</span>
+          <a href="/devs/{{ x.dev.pseudo }}">{{ x.dev.pseudo }}</a> · {{ x.pays|drapeau }} {{ x.pays|nom_pays }} · {{ x.le|il_y_a }}
+        </div>
+        {% if x.note %}<div class="contenu">{{ x.note }}</div>{% endif %}
+      </div>
+      {% else %}
+      <p class="aide">Personne ne l'a encore essayé. Le premier essai fait passer le connecteur de « À vérifier » à « Vivant », ou alerte son auteur.</p>
+      {% endfor %}
+
+      <div id="essayer" style="margin-top:16px">
+        {% if moi %}
+        <form method="post" action="/connecteurs/{{ c.slug }}/essai">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <h3>{{ "Mettre à jour mon essai" if mon_essai else "Je l'ai essayé" }}</h3>
+          <div class="radio champ">
+            <label><input type="radio" name="marche" value="oui" {% if not mon_essai or mon_essai.marche %}checked{% endif %}> Ça marche</label>
+            <label><input type="radio" name="marche" value="non" {% if mon_essai and not mon_essai.marche %}checked{% endif %}> Ça ne marche pas</label>
+          </div>
+          <div class="deux">
+            <div class="champ"><label for="pays-essai">Testé depuis</label>
+              <select id="pays-essai" name="pays">{{ options_pays(mon_essai.pays if mon_essai else moi.pays, "Pays") }}</select></div>
+            <div class="champ"><label for="note">Ce que vous avez constaté</label>
+              <input id="note" name="note" maxlength="500" value="{{ mon_essai.note if mon_essai else '' }}" placeholder="Obligatoire en cas d'échec : message d'erreur, étape…"></div>
+          </div>
+          <button class="btn" type="submit">Enregistrer mon essai</button>
+        </form>
+        {% else %}
+        <p><a href="/connexion?suite=/connecteurs/{{ c.slug }}">Connectez-vous</a> pour dire si ce connecteur marche chez vous.</p>
+        {% endif %}
+      </div>
+    </section>
+
+    {{ fil(messages, "/connecteurs/" ~ c.slug ~ "/message", csrf, moi, request.url.path) }}
+  </div>
+
+  <aside>
+    <section class="panneau">
+      <dl class="meta">
+        {% if c.service %}<dt>Service</dt><dd>{{ c.service }}</dd>{% endif %}
+        <dt>Pays</dt><dd>{{ drapeaux(c.codes_pays, 12) }}<br><span class="aide">{{ c.codes_pays|map('nom_pays')|join(', ') }}</span></dd>
+        <dt>Dépôt</dt><dd><a href="{{ c.depot_url }}" rel="nofollow noopener" target="_blank">{{ c.depot_url|replace('https://', '') }}</a></dd>
+        {% if c.doc_url %}<dt>Doc</dt><dd><a href="{{ c.doc_url }}" rel="nofollow noopener" target="_blank">Documentation</a></dd>{% endif %}
+        <dt>Licence</dt><dd>{{ c.gh_licence or "non détectée" }}</dd>
+        {% if sur_github %}
+        <dt>Tests</dt><dd>{{ {"success": "passent", "failure": "échouent"}.get(c.gh_ci, "aucun visible") }}</dd>
+        <dt>Dernier commit</dt><dd>{{ c.gh_dernier_push|il_y_a }}</dd>
+        <dt>Étoiles</dt><dd>{{ c.gh_etoiles }}</dd>
+        {% endif %}
+        <dt>Relu le</dt><dd>{{ c.gh_verifie_le|il_y_a }}{% if c.gh_erreur %}<br><span class="aide">{{ c.gh_erreur }}</span>{% endif %}</dd>
+      </dl>
+      {% if modifiable %}
+      <form method="post" action="/connecteurs/{{ c.slug }}/relever" style="margin-top:12px">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <button class="btn discret petit" type="submit">Relire le dépôt maintenant</button>
+      </form>
+      {% endif %}
+    </section>
+
+    <section class="panneau" id="equipe">
+      <h3>Équipe</h3>
+      <ul class="liste">
+        <li><span class="avatar">{{ c.auteur.pseudo[:1]|upper }}</span> <a href="/devs/{{ c.auteur.pseudo }}">{{ c.auteur.pseudo }}</a> {{ c.auteur.pays|drapeau }} <span class="aide">auteur</span></li>
+        {% for x in contributeurs %}
+        <li><span class="avatar">{{ x.dev.pseudo[:1]|upper }}</span> <a href="/devs/{{ x.dev.pseudo }}">{{ x.dev.pseudo }}</a> {{ x.dev.pays|drapeau }} <span class="aide">{{ x.role }}</span></li>
+        {% endfor %}
+      </ul>
+      {% if moi and moi.id != c.auteur_id and not deja_contributeur %}
+      <form method="post" action="/connecteurs/{{ c.slug }}/rejoindre" style="margin-top:10px">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <label for="role">Je contribue à ce connecteur</label>
+        <input id="role" name="role" maxlength="200" placeholder="Ex. : je maintiens la partie Moov Money">
+        <button class="btn second petit" type="submit" style="margin-top:8px">Rejoindre l'équipe</button>
+      </form>
+      {% endif %}
+    </section>
+
+    {% if demandes %}
+    <section class="panneau">
+      <h3>Répond aux demandes</h3>
+      <ul class="liste">{% for d in demandes %}<li><a href="/demandes/{{ d.id }}">{{ d.titre }}</a></li>{% endfor %}</ul>
+    </section>
+    {% endif %}
+
+    <section class="panneau">
+      <h3>Pour un agent IA</h3>
+      <p class="aide">Cette fiche est aussi servie en JSON et par le serveur MCP de Relais.</p>
+      <a href="/api/connecteurs/{{ c.slug }}">/api/connecteurs/{{ c.slug }}</a>
+    </section>
+  </aside>
+</div>
+{% endblock %}

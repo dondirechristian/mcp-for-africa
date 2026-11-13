@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block titre %}Pour les agents IA — Relais{% endblock %}
+{% block contenu %}
+<div style="max-width:780px">
+  <h1>Relais pour les agents IA</h1>
+  <p>Les développeurs construisent de plus en plus avec des agents IA. Un agent qui doit encaisser un paiement à Ouagadougou ou lire un registre à Abidjan ne sait pas quel connecteur existe, ni s'il marche encore. Relais le lui dit.</p>
+
+  <h2>Serveur MCP</h2>
+  <p>Relais expose son catalogue par le <strong>Model Context Protocol</strong>, en transport HTTP sans état :</p>
+  <pre><code>{{ url_mcp }}</code></pre>
+  <p>Dans la configuration d'un client MCP (Claude, Cursor, VS Code…) :</p>
+  <pre><code>{
+  "mcpServers": {
+    "relais": { "type": "http", "url": "{{ url_mcp }}" }
+  }
+}</code></pre>
+  <p>Deux outils, en lecture seule :</p>
+  <ul>
+    <li><code>chercher_connecteurs(recherche, pays, categorie)</code> : les connecteurs qui correspondent, avec leur état et la raison de cet état ;</li>
+    <li><code>demandes_ouvertes(pays)</code> : les besoins déjà exprimés, pour ne pas construire en double.</li>
+  </ul>
+
+  <h2>API JSON</h2>
+  <ul>
+    <li><a href="/api/connecteurs">/api/connecteurs</a> (filtres <code>?pays=BF&amp;categorie=paiement</code>)</li>
+    <li><code>/api/connecteurs/&lt;slug&gt;</code></li>
+    <li><a href="/api/demandes">/api/demandes</a></li>
+    <li><a href="/api/docs">Documentation interactive</a></li>
+  </ul>
+
+  <h2>Comment l'état est calculé</h2>
+  <p>Un connecteur est <span class="badge vivant">Vivant</span> si un dev a confirmé qu'il marche ces 60 derniers jours, ou si ses tests automatiques passent et que son code a bougé ces 6 derniers mois.
+  Il est <span class="badge casse">Signalé cassé</span> si le dernier essai a échoué, si ses tests échouent ou si son dépôt est archivé.
+  Sinon il est <span class="badge a-verifier">À vérifier</span>. La fiche dit toujours pourquoi.</p>
+
+  <h2 id="ia">Déclaration d'usage de l'IA</h2>
+  <p>Relais a été développé avec l'aide de <strong>Claude (Anthropic)</strong>, utilisé comme assistant de programmation dans Claude Code : architecture, code Python, gabarits, styles et tests. La conception du produit, le choix du sujet, le contenu des connecteurs d'origine et la relecture sont l'œuvre de l'équipe. Les commits produits avec l'assistant portent la mention <code>Co-Authored-By: Claude</code>. La plateforme elle-même n'appelle aucun modèle d'IA.</p>
+</div>
+{% endblock %}

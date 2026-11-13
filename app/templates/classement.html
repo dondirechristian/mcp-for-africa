@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block titre %}Classement — Relais{% endblock %}
+{% block contenu %}
+<h1>Classement</h1>
+<p class="aide" style="max-width:46em">Les points récompensent ce qui aide les autres : publier un connecteur (10), résoudre une demande (15), rejoindre l'équipe d'un connecteur (3), partager un essai (2), publier une demande ou un message (1).</p>
+<div class="mise-en-page">
+  <section class="panneau">
+    <h2>Devs</h2>
+    <div class="defile"><table class="tableau">
+      <thead><tr><th class="num">#</th><th>Dev</th><th>Pays</th><th class="num">Points</th></tr></thead>
+      <tbody>
+      {% for d, n in top %}
+        <tr><td class="num">{{ loop.index }}</td><td><a href="/devs/{{ d.pseudo }}">{{ d.pseudo }}</a></td><td>{{ d.pays|drapeau }} {{ d.pays|nom_pays }}</td><td class="num"><b>{{ n }}</b></td></tr>
+      {% else %}<tr><td colspan="4">Personne encore.</td></tr>{% endfor %}
+      </tbody>
+    </table></div>
+  </section>
+  <aside class="panneau">
+    <h2>Pays</h2>
+    <table class="tableau">
+      <tbody>
+      {% for code, n in pays %}
+        <tr><td>{{ loop.index }}.</td><td>{{ code|drapeau }} {{ code|nom_pays }}</td><td class="num"><b>{{ n }}</b></td></tr>
+      {% else %}<tr><td>Aucun pays encore.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </aside>
+</div>
+{% endblock %}

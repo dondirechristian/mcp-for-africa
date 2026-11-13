@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% from "_macros.html" import drapeaux, fil %}
+{% block titre %}{{ d.titre }} — Relais{% endblock %}
+{% block contenu %}
+<div class="sous" style="margin-bottom:8px"><a href="/demandes">Demandes</a> › {{ ref.CATEGORIES.get(d.categorie) }}</div>
+<h1>{{ d.titre }}</h1>
+<div class="sous" style="margin-bottom:18px">
+  {% if d.statut == 'ouverte' %}<span class="badge ocre">Ouverte</span>
+  {% elif d.statut == 'en-cours' %}<span class="badge a-verifier">En cours : {{ d.preneur.pseudo }}</span>
+  {% else %}<span class="badge vivant">Résolue</span>{% endif %}
+  {{ drapeaux(d.codes_pays, 12) }} · demandée par <a href="/devs/{{ d.auteur.pseudo }}">{{ d.auteur.pseudo }}</a> {{ d.cree_le|il_y_a }}
+</div>
+<div class="mise-en-page">
+  <div>
+    {% if d.statut == 'resolue' and d.connecteur %}
+    <div class="etat-bloc vivant"><strong>Résolue</strong> par <a href="/devs/{{ d.preneur.pseudo }}">{{ d.preneur.pseudo }}</a> avec le connecteur
+      <a href="/connecteurs/{{ d.connecteur.slug }}"><strong>{{ d.connecteur.nom }}</strong></a>.</div>
+    {% endif %}
+    <section class="panneau contenu">{{ d.description|md if d.description else "<p class='aide'>Pas de description.</p>"|safe }}</section>
+    {{ fil(messages, "/demandes/" ~ d.id ~ "/message", csrf, moi, request.url.path) }}
+  </div>
+  <aside>
+    <section class="panneau">
+      <h3>{{ soutiens|length }} dev(s) en ont besoin</h3>
+      <p>{% for x in soutiens %}<a href="/devs/{{ x.pseudo }}" title="{{ x.pseudo }}"><span class="avatar">{{ x.pseudo[:1]|upper }}</span></a> {% endfor %}</p>
+      {% if moi %}
+      <form method="post" action="/demandes/{{ d.id }}/soutenir">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <button class="btn {{ 'discret' if je_soutiens else 'second' }}" type="submit">{{ "Retirer mon soutien" if je_soutiens else "▲ Moi aussi j'en ai besoin" }}</button>
+      </form>
+      {% endif %}
+    </section>
+    {% if d.statut != 'resolue' %}
+    <section class="panneau">
+      <h3>Vous savez le faire ?</h3>
+      {% if not moi %}
+        <p><a href="/connexion?suite=/demandes/{{ d.id }}">Connectez-vous</a> pour prendre cette demande.</p>
+      {% else %}
+        {% if d.statut == 'ouverte' %}
+        <form method="post" action="/demandes/{{ d.id }}/prendre"><input type="hidden" name="csrf" value="{{ csrf }}">
+          <button class="btn" type="submit">Je m'en occupe</button></form>
+          <p class="aide">Les autres verront que quelqu'un y travaille, et pourront vous aider plutôt que tout refaire.</p>
+        {% elif d.preneur_id == moi.id %}
+        <form method="post" action="/demandes/{{ d.id }}/prendre"><input type="hidden" name="csrf" value="{{ csrf }}">
+          <button class="btn discret petit" type="submit">Rendre la demande</button></form>
+        {% endif %}
+        <p style="margin-top:12px"><a class="btn second" href="/connecteurs/nouveau?demande={{ d.id }}">Publier le connecteur qui y répond</a></p>
+        {% if mes_connecteurs %}
+        <form method="post" action="/demandes/{{ d.id }}/resoudre" style="margin-top:8px">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <label for="connecteur">… ou un de vos connecteurs existants</label>
+          <select id="connecteur" name="connecteur">{% for c in mes_connecteurs %}<option value="{{ c.slug }}">{{ c.nom }}</option>{% endfor %}</select>
+          <button class="btn discret petit" type="submit" style="margin-top:8px">Marquer résolue</button>
+        </form>
+        {% endif %}
+      {% endif %}
+    </section>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

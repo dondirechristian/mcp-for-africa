@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% from "_macros.html" import selection_pays, options %}
+{% block titre %}Exprimer un besoin — Relais{% endblock %}
+{% block contenu %}
+<div class="formulaire">
+  <h1>Exprimer un besoin</h1>
+  <p class="aide">Vérifiez d'abord dans les <a href="/connecteurs">connecteurs</a> et les <a href="/demandes">demandes</a> : si quelqu'un a déjà le même besoin, soutenez sa demande, elle montera.</p>
+  {% if erreurs %}<ul class="erreurs">{% for e in erreurs %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+  <form method="post" action="/demandes/nouvelle">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <div class="champ"><label for="titre">Ce qu'il vous faut</label><input id="titre" name="titre" required maxlength="140" value="{{ d.titre }}" placeholder="Connecteur pour vérifier un numéro IFU au Bénin"></div>
+    <div class="champ"><label for="categorie">Catégorie</label><select id="categorie" name="categorie" required>{{ options(ref.CATEGORIES, d.categorie, "Choisir…") }}</select></div>
+    <div class="champ"><label>Pays concernés</label>{{ selection_pays("pays", d.codes_pays) }}</div>
+    <div class="champ"><label for="description">Contexte</label>
+      <textarea id="description" name="description" rows="8" placeholder="À quoi ça vous servirait, ce qui existe déjà (documentation, portail, PDF), ce que vous avez essayé.">{{ d.description }}</textarea></div>
+    <button class="btn" type="submit">Publier la demande</button>
+  </form>
+</div>
+{% endblock %}
