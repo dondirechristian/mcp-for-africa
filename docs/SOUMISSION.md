@@ -5,10 +5,10 @@ Textes prêts à copier dans le formulaire de soumission. Les passages entre [cr
 ## Identité du projet
 
 - **Nom** : MCP for Africa
-- **Équipe** : [nom de l'équipe] — représentant : Christian Aristide Dondire — pays de représentation : Burkina Faso
-- **Démo en ligne** : [URL DataCloud]
+- **Équipe** : MCP for Africa — représentant : Christian Aristide Dondire — pays de représentation : Burkina Faso
+- **Démo en ligne** : https://mcp-for-africa-9cdc389b.platform-systalink.com
 - **Code source** : https://github.com/dondirechristian/mcp-for-africa
-- **Produit DataCloud utilisé** : [ex. service web Starter + base PostgreSQL], acquis avec la remise CADEV
+- **Produit DataCloud utilisé** : service web Starter (Docker, région Dakar), offre payante
 
 ## Résumé (une phrase)
 
