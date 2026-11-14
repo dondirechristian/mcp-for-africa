@@ -13,7 +13,8 @@ def maintenant() -> datetime:
 
 
 def url_base() -> str:
-    url = os.environ.get("DATABASE_URL", "sqlite:///./mcp_for_africa.db")
+    # Variable absente OU vide (import d'un .env pas encore complété) : SQLite.
+    url = os.environ.get("DATABASE_URL", "").strip() or "sqlite:///./mcp_for_africa.db"
     # Les hébergeurs donnent souvent postgres:// ou postgresql:// ; on impose
     # le pilote pg8000 (licence BSD) : psycopg est sous LGPL, refusé par la CADEV.
     for prefixe in ("postgres://", "postgresql://"):
