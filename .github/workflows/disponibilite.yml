@@ -1,0 +1,24 @@
+name: Disponibilite
+# Verifie toutes les 10 minutes que la demo repond.
+# Effet secondaire voulu : l'hebergement gratuit ne se met pas en veille.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  sante:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: La demo repond
+        env:
+          URL: ${{ vars.DEMO_URL || 'https://mcp-for-africa.onrender.com' }}
+        run: |
+          for i in 1 2 3; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 "$URL/sante") || true
+            echo "Essai $i : $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 15
+          done
+          exit 1

@@ -19,6 +19,8 @@ from .referentiel import LICENCES_COPYLEFT
 
 _RE_GITHUB = re.compile(r"^https?://(?:www\.)?github\.com/([\w.-]+)/([\w.-]+?)(?:\.git)?/?$")
 FRAICHEUR = timedelta(hours=6)
+# Après un échec passager (quota GitHub, réseau), on réessaie bien plus tôt.
+NOUVEL_ESSAI = timedelta(minutes=10)
 FENETRE_ESSAIS = timedelta(days=60)
 FENETRE_COMMIT = timedelta(days=180)
 
@@ -35,8 +37,12 @@ def _date_iso(texte: str | None) -> datetime | None:
 
 
 def releve_a_faire(c: Connecteur) -> bool:
-    return bool(depot_github(c.depot_url)) and (
-        c.gh_verifie_le is None or maintenant() - c.gh_verifie_le > FRAICHEUR)
+    if not depot_github(c.depot_url):
+        return False
+    if c.gh_verifie_le is None:
+        return True
+    delai = NOUVEL_ESSAI if "plus tard" in (c.gh_erreur or "") else FRAICHEUR
+    return maintenant() - c.gh_verifie_le > delai
 
 
 def _api_github(chemin: str, params: dict | None = None) -> dict:
