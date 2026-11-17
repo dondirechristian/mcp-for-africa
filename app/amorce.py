@@ -38,6 +38,7 @@ CONNECTEURS = [
         "installation": "claude mcp add brvm -- uvx --from git+https://github.com/sotechdi/brvm-mcp brvm-mcp",
         "depot_url": "https://github.com/SOTECHDI/brvm-mcp",
         "doc_url": "https://sotechdi.github.io/brvm-mcp/",
+        "licence": "Commerciale (SOTECHDI)",
     },
     {
         "slug": "momo-xof-mcp", "nom": "momo-xof-mcp", "type": "mcp", "langage": "Python",
@@ -141,7 +142,7 @@ def amorcer() -> None:
                 installation=d["installation"], categorie=d["categorie"], type=d["type"],
                 langage=d["langage"], service=d["service"], pays="," + ",".join(d["pays"]) + ",",
                 depot_url=d.get("depot_url") or f"https://github.com/{PROPRIO_GITHUB}/{d.get('depot', d['slug'])}",
-                doc_url=d.get("doc_url", ""), auteur_id=dev.id)
+                doc_url=d.get("doc_url", ""), licence_declaree=d.get("licence", ""), auteur_id=dev.id)
             if os.environ.get("MFA_AMORCE_RELEVE", "1") == "1":
                 relever_github(c)
             s.add(c)

@@ -83,7 +83,7 @@
         <dt>Pays</dt><dd>{{ drapeaux(c.codes_pays, 12) }}<br><span class="aide">{{ c.codes_pays|map('nom_pays')|join(', ') }}</span></dd>
         <dt>Dépôt</dt><dd><a href="{{ c.depot_url }}" rel="nofollow noopener" target="_blank">{{ c.depot_url|replace('https://', '') }}</a></dd>
         {% if c.doc_url %}<dt>Doc</dt><dd><a href="{{ c.doc_url }}" rel="nofollow noopener" target="_blank">Documentation</a></dd>{% endif %}
-        <dt>Licence</dt><dd>{{ c.gh_licence or "non détectée" }}</dd>
+        <dt>Licence</dt><dd>{% if c.gh_licence %}{{ c.gh_licence }}{% elif c.licence_declaree %}{{ c.licence_declaree }}<br><span class="aide">Déclarée par l'auteur, absente du dépôt.</span>{% else %}non détectée{% endif %}</dd>
         {% if sur_github %}
         <dt>Tests</dt><dd>{{ {"success": "passent", "failure": "échouent"}.get(c.gh_ci, "aucun visible") }}</dd>
         <dt>Dernier commit</dt><dd>{{ c.gh_dernier_push|il_y_a }}</dd>

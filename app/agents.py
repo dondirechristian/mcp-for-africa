@@ -30,7 +30,7 @@ def _fiche(c: Connecteur, essais: list[Essai]) -> dict:
         "categorie": ref.CATEGORIES.get(c.categorie, c.categorie),
         "type": ref.TYPES.get(c.type, c.type), "langage": c.langage,
         "pays": [ref.nom_pays(p) for p in c.codes_pays],
-        "depot": c.depot_url, "licence": c.gh_licence or "inconnue",
+        "depot": c.depot_url, "licence": c.licence or "inconnue",
         "etat": e["libelle"], "pourquoi": e["raisons"],
         "installation": c.installation,
     }

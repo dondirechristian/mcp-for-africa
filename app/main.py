@@ -309,6 +309,7 @@ def _lire_connecteur(f, c: Connecteur) -> list[str]:
     c.pays = pays_champ(ref.pays_depuis_formulaire(f.getlist("pays")))
     c.depot_url = url_valide(f.get("depot_url"))
     c.doc_url = url_valide(f.get("doc_url"))
+    c.licence_declaree = (f.get("licence_declaree") or "").strip()[:80]
     if len(c.nom) < 3:
         erreurs.append("Le nom doit faire au moins 3 caractères.")
     if len(c.resume) < 10:
@@ -747,7 +748,7 @@ def connecteur_json(c: Connecteur, e: dict, base: str) -> dict:
         "slug": c.slug, "nom": c.nom, "resume": c.resume, "service": c.service,
         "categorie": c.categorie, "type": c.type, "langage": c.langage,
         "pays": c.codes_pays, "depot": c.depot_url, "documentation": c.doc_url,
-        "licence": c.gh_licence, "etat": e["niveau"], "raisons_etat": e["raisons"],
+        "licence": c.licence, "etat": e["niveau"], "raisons_etat": e["raisons"],
         "installation": c.installation, "fiche": f"{base}/connecteurs/{c.slug}",
         "auteur": c.auteur.pseudo,
     }

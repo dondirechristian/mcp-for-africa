@@ -198,3 +198,12 @@ def test_releve_github_sans_reseau(monkeypatch):
     c = Connecteur(depot_url="https://gitlab.com/a/b")
     module_etat.relever_github(c)
     assert "hors GitHub" in c.gh_erreur
+
+
+def test_licence_declaree(client):
+    # brvm-mcp n'a pas de licence détectable sur GitHub : celle déclarée par l'auteur est affichée.
+    fiches = {c["slug"]: c for c in client.get("/api/connecteurs").json()}
+    assert fiches["brvm-mcp"]["licence"] == "Commerciale (SOTECHDI)"
+    assert "Déclarée par l'auteur" in client.get("/connecteurs/brvm-mcp").text
+    c = Connecteur(gh_licence="MIT", licence_declaree="Commerciale")
+    assert c.licence == "MIT"  # la licence relevée sur le dépôt prime

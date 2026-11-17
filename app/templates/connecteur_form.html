@@ -24,6 +24,8 @@
       <div class="champ"><label for="langage">Langage</label><select id="langage" name="langage"><option value="">—</option>{% for l in ref.LANGAGES %}<option {% if l == c.langage %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
       <div class="champ"><label for="doc_url">Documentation (facultatif)</label><input id="doc_url" name="doc_url" type="url" value="{{ c.doc_url }}"></div>
     </div>
+    <div class="champ"><label for="licence_declaree">Licence (facultatif)</label><input id="licence_declaree" name="licence_declaree" maxlength="80" value="{{ c.licence_declaree or '' }}" placeholder="Ex. : Commerciale, Apache-2.0">
+      <p class="aide">Sur GitHub, la licence du dépôt est détectée et prime sur ce champ. À remplir si elle n'est pas détectée.</p></div>
     <div class="champ"><label>Pays couverts</label>{{ selection_pays("pays", c.codes_pays) }}</div>
     <div class="champ"><label for="description">Description</label>
       <textarea id="description" name="description" rows="10" placeholder="Ce qu'il sait faire, ce qu'il ne sait pas faire, et surtout les pièges du service que vous avez découverts.">{{ c.description }}</textarea>

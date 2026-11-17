@@ -3,7 +3,7 @@ import os
 from datetime import datetime, timezone
 
 from sqlalchemy import (Boolean, DateTime, ForeignKey, Integer, String, Text,
-                        UniqueConstraint, create_engine)
+                        UniqueConstraint, create_engine, inspect, text)
 from sqlalchemy.orm import (DeclarativeBase, Mapped, Session, mapped_column,
                             relationship, sessionmaker)
 
@@ -73,6 +73,9 @@ class Connecteur(Base):
     service: Mapped[str] = mapped_column(String(120), default="")
     depot_url: Mapped[str] = mapped_column(String(300), default="")
     doc_url: Mapped[str] = mapped_column(String(300), default="")
+    # Licence déclarée par l'auteur, affichée quand GitHub n'en détecte aucune
+    # (licence commerciale, fichier de licence non standard, dépôt hors GitHub).
+    licence_declaree: Mapped[str] = mapped_column(String(80), default="")
     auteur_id: Mapped[int] = mapped_column(ForeignKey("devs.id"))
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=maintenant)
     modifie_le: Mapped[datetime] = mapped_column(DateTime, default=maintenant)
@@ -90,6 +93,11 @@ class Connecteur(Base):
     @property
     def codes_pays(self) -> list[str]:
         return [c for c in self.pays.strip(",").split(",") if c]
+
+    @property
+    def licence(self) -> str:
+        """Licence relevée sur GitHub, sinon celle déclarée par l'auteur."""
+        return self.gh_licence or self.licence_declaree
 
 
 class Essai(Base):
@@ -165,8 +173,20 @@ class Message(Base):
     dev: Mapped[Dev] = relationship()
 
 
+# Colonnes ajoutées après la première mise en ligne : create_all ne modifie pas
+# une table existante, on les ajoute donc à la main si elles manquent.
+_COLONNES_AJOUTEES = {"connecteurs": {"licence_declaree": "VARCHAR(80) NOT NULL DEFAULT ''"}}
+
+
 def creer_tables() -> None:
     Base.metadata.create_all(moteur)
+    inspecteur = inspect(moteur)
+    with moteur.begin() as cx:
+        for table, colonnes in _COLONNES_AJOUTEES.items():
+            existantes = {c["name"] for c in inspecteur.get_columns(table)}
+            for nom, definition in colonnes.items():
+                if nom not in existantes:
+                    cx.execute(text(f"ALTER TABLE {table} ADD COLUMN {nom} {definition}"))
 
 
 def session() -> Session:
