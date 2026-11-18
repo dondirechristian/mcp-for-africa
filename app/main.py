@@ -20,6 +20,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from . import referentiel as ref
 from .db import (Connecteur, Contributeur, Demande, Dev, Essai, Message,
                  Soutien, creer_tables, maintenant, session as nouvelle_session)
+from .references import COMPTE_VEILLE
 from .etat import depot_github, etat, licence_copyleft, relever_github, releve_a_faire
 from .securite import Limiteur, csrf_valide, hacher, jeton_csrf, verifier
 
@@ -37,8 +38,9 @@ limite_ecriture = Limiteur(40, 600)
 async def cycle_de_vie(app: FastAPI):
     creer_tables()
     if os.environ.get("MFA_AMORCE", "1") == "1":
-        from .amorce import amorcer
+        from .amorce import amorcer, referencer
         amorcer()
+        referencer()
     yield
 
 
@@ -48,7 +50,7 @@ app.add_middleware(SessionMiddleware, secret_key=SECRET, max_age=30 * 24 * 3600,
 app.mount("/static", StaticFiles(directory=ICI / "static"), name="static")
 
 # Le serveur MCP de la plateforme elle-même, sur /mcp (voir agents.py).
-from .agents import routeur as routeur_mcp  # noqa: E402
+from .agents import chercher_connecteurs, routeur as routeur_mcp  # noqa: E402
 app.include_router(routeur_mcp)
 
 gabarits = Jinja2Templates(directory=ICI / "templates")
@@ -240,12 +242,15 @@ def accueil(request: Request, s: Session = Depends(bd)):
     chiffres = {
         "connecteurs": s.scalar(select(func.count(Connecteur.id))) or 0,
         "pays": len(cov["par_pays"]),
-        "devs": s.scalar(select(func.count(Dev.id))) or 0,
+        "devs": s.scalar(select(func.count(Dev.id)).where(Dev.pseudo != COMPTE_VEILLE)) or 0,
         "essais": s.scalar(select(func.count(Essai.id))) or 0,
         "demandes": s.scalar(select(func.count(Demande.id)).where(Demande.statut != "resolue")) or 0,
     }
+    # Démonstration en direct : la vraie réponse de l'outil MCP, calculée à l'instant.
+    demo_ia = chercher_connecteurs(pays="BF", categorie="paiement")[:3]
     return rendre(request, s, "accueil.html", recents=recents, etats=etats(s, recents),
-                  demandes=demandes, chiffres=chiffres, cov=cov)
+                  demandes=demandes, chiffres=chiffres, cov=cov, demo_ia=demo_ia,
+                  url_mcp=str(request.base_url).rstrip("/") + "/mcp")
 
 
 @app.get("/connecteurs", response_class=HTMLResponse)
@@ -366,7 +371,8 @@ def fiche_connecteur(slug: str, request: Request, taches: BackgroundTasks, s: Se
                   contributeurs=contributeurs, messages=messages, demandes=demandes,
                   mon_essai=mon_essai, modifiable=peut_modifier(s, c, moi),
                   deja_contributeur=any(x.dev_id == (moi.id if moi else 0) for x in contributeurs),
-                  copyleft=licence_copyleft(c), sur_github=bool(depot_github(c.depot_url)))
+                  copyleft=licence_copyleft(c), sur_github=bool(depot_github(c.depot_url)),
+                  reference=c.auteur.pseudo == COMPTE_VEILLE, proprietaire=proprietaire_depot(c))
 
 
 @app.get("/connecteurs/{slug}/modifier", response_class=HTMLResponse)
@@ -633,7 +639,7 @@ def profil_public(pseudo: str, request: Request, s: Session = Depends(bd)):
 @app.get("/classement", response_class=HTMLResponse)
 def classement(request: Request, s: Session = Depends(bd)):
     p = points_par_dev(s)
-    devs = {d.id: d for d in s.scalars(select(Dev))}
+    devs = {d.id: d for d in s.scalars(select(Dev).where(Dev.pseudo != COMPTE_VEILLE))}
     top = [(devs[i], n) for i, n in p.most_common() if i in devs and n > 0][:50]
     par_pays: Counter = Counter()
     for i, n in p.items():
@@ -743,6 +749,11 @@ async def enregistrer_profil(request: Request, s: Session = Depends(bd)):
 
 # ------------------------------------------------------------------ API JSON publique
 
+def proprietaire_depot(c: Connecteur) -> str:
+    depot = depot_github(c.depot_url)
+    return depot[0] if depot else ""
+
+
 def connecteur_json(c: Connecteur, e: dict, base: str) -> dict:
     return {
         "slug": c.slug, "nom": c.nom, "resume": c.resume, "service": c.service,
@@ -750,7 +761,8 @@ def connecteur_json(c: Connecteur, e: dict, base: str) -> dict:
         "pays": c.codes_pays, "depot": c.depot_url, "documentation": c.doc_url,
         "licence": c.licence, "etat": e["niveau"], "raisons_etat": e["raisons"],
         "installation": c.installation, "fiche": f"{base}/connecteurs/{c.slug}",
-        "auteur": c.auteur.pseudo,
+        "auteur": proprietaire_depot(c) if c.auteur.pseudo == COMPTE_VEILLE else c.auteur.pseudo,
+        "reference_par_la_plateforme": c.auteur.pseudo == COMPTE_VEILLE,
     }
 
 

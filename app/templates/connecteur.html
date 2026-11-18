@@ -102,7 +102,12 @@
     <section class="panneau" id="equipe">
       <h3>Équipe</h3>
       <ul class="liste">
+        {% if reference %}
+        <li><span class="avatar">{{ (proprietaire or "?")[:1]|upper }}</span> {% if proprietaire %}<a href="https://github.com/{{ proprietaire }}" rel="nofollow noopener" target="_blank">{{ proprietaire }}</a>{% else %}inconnu{% endif %} <span class="aide">auteur du code</span></li>
+        <li class="aide">Connecteur open source existant, référencé par l'équipe MCP for Africa. Vous en êtes l'auteur ? Rejoignez l'équipe ci-dessous pour le reprendre en main.</li>
+        {% else %}
         <li><span class="avatar">{{ c.auteur.pseudo[:1]|upper }}</span> <a href="/devs/{{ c.auteur.pseudo }}">{{ c.auteur.pseudo }}</a> {{ c.auteur.pays|drapeau }} <span class="aide">auteur</span></li>
+        {% endif %}
         {% for x in contributeurs %}
         <li><span class="avatar">{{ x.dev.pseudo[:1]|upper }}</span> <a href="/devs/{{ x.dev.pseudo }}">{{ x.dev.pseudo }}</a> {{ x.dev.pays|drapeau }} <span class="aide">{{ x.role }}</span></li>
         {% endfor %}

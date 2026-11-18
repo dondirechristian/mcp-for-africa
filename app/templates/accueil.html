@@ -9,6 +9,7 @@
     <div class="actions">
       <a class="btn" href="/connecteurs">Trouver un connecteur</a>
       <a class="btn second" href="/demandes">Voir ce qui manque</a>
+      <a class="btn second" href="/a-propos">Brancher un agent IA</a>
     </div>
   </div>
   <div class="illustration" aria-label="Exemple d'états de connecteurs">
@@ -28,6 +29,42 @@
   <div class="chiffre"><b>{{ chiffres.essais }}</b><span>essais partagés</span></div>
   <div class="chiffre"><b>{{ chiffres.demandes }}</b><span>besoins en attente</span></div>
 </div>
+
+<section class="section ia">
+  <div class="surtitre">Pour les agents IA</div>
+  <h2>Votre assistant de code sait enfin ce qui marche en Afrique</h2>
+  <p class="aide" style="max-width:46em">Claude, Cursor ou tout client MCP peut interroger la plateforme directement. Il obtient les connecteurs, leur état réel et la raison de cet état, au lieu d'inventer une intégration qui ne fonctionne plus.</p>
+  <div class="ia-grille">
+    <div class="panneau">
+      <div class="ia-question">« Quel connecteur de paiement marche aujourd'hui au Burkina Faso ? »</div>
+      <pre><code>tools/call  chercher_connecteurs
+{ "pays": "BF", "categorie": "paiement" }</code></pre>
+      <ul class="liste">
+        {% for f in demo_ia %}
+        <li class="ia-reponse">
+          <span class="badge {{ {'Vivant': 'vivant', 'À vérifier': 'a-verifier', 'Signalé cassé': 'casse'}.get(f.etat, '') }}"><span class="point"></span>{{ f.etat }}</span>
+          <strong>{{ f.nom }}</strong> <span class="aide">· {{ f.licence }}</span>
+          {% if f.pourquoi %}<div class="aide">{{ f.pourquoi[0] }}</div>{% endif %}
+        </li>
+        {% else %}<li class="aide">Aucun connecteur pour l'instant.</li>{% endfor %}
+      </ul>
+      <p class="aide" style="margin:8px 0 0">Réponse réelle du serveur MCP, calculée à l'ouverture de cette page.</p>
+    </div>
+    <div class="panneau">
+      <h3 style="margin-top:0">Le brancher en une ligne</h3>
+      <pre><code>{
+  "mcpServers": {
+    "mcp-for-africa": {
+      "type": "http",
+      "url": "{{ url_mcp }}"
+    }
+  }
+}</code></pre>
+      <p class="aide">Lecture seule, sans clé. Deux outils : <code>chercher_connecteurs</code> et <code>demandes_ouvertes</code>. Une API JSON ouverte est aussi disponible.</p>
+      <a class="btn second petit" href="/a-propos">Tout savoir sur l'accès agents IA →</a>
+    </div>
+  </div>
+</section>
 
 <section class="section">
   <h2>Comment ça marche</h2>

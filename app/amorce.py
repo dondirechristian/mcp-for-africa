@@ -10,6 +10,7 @@ from sqlalchemy import func, select
 
 from .db import Connecteur, Demande, Dev, Soutien, session
 from .etat import relever_github
+from .references import COMPTE_VEILLE, REFERENCES
 from .securite import hacher
 
 PROPRIO_GITHUB = os.environ.get("MFA_AMORCE_GITHUB", "dondirechristian")
@@ -152,6 +153,40 @@ def amorcer() -> None:
             s.add(dm)
             s.flush()
             s.add(Soutien(demande_id=dm.id, dev_id=dev.id))
+        s.commit()
+    finally:
+        s.close()
+
+
+def referencer() -> None:
+    """Ajoute au catalogue les connecteurs tiers de references.py qui n'y sont pas encore.
+
+    Idempotent : tourne à chaque démarrage, n'ajoute que les fiches absentes et ne
+    touche jamais à une fiche existante (son auteur a pu la reprendre en main).
+    """
+    s = session()
+    try:
+        presents = set(s.scalars(select(Connecteur.slug)))
+        a_ajouter = [d for d in REFERENCES if d["slug"] not in presents]
+        if not a_ajouter:
+            return
+        veille = s.scalar(select(Dev).where(Dev.pseudo == COMPTE_VEILLE))
+        if not veille:
+            veille = Dev(pseudo=COMPTE_VEILLE, email="veille@mcp-for-africa.invalid", mdp="!",
+                         bio="Compte de MCP for Africa qui référence des connecteurs open source "
+                             "existants, écrits par d'autres. Chaque fiche crédite l'auteur du code ; "
+                             "il peut la reprendre en main.")
+            s.add(veille)
+            s.flush()
+        for d in a_ajouter:
+            c = Connecteur(
+                slug=d["slug"], nom=d["nom"], resume=d["resume"], description=d["description"],
+                installation=d["installation"], categorie=d["categorie"], type=d["type"],
+                langage=d["langage"], service=d["service"], pays="," + ",".join(d["pays"]) + ",",
+                depot_url=d["depot_url"], doc_url=d.get("doc_url", ""), auteur_id=veille.id)
+            if os.environ.get("MFA_AMORCE_RELEVE", "1") == "1":
+                relever_github(c)
+            s.add(c)
         s.commit()
     finally:
         s.close()

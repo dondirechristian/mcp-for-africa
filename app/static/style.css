@@ -204,3 +204,10 @@ label { display: block; font-weight: 600; margin-bottom: 4px; }
 .vide-etat { text-align: center; color: var(--texte-2); padding: 28px 16px; border: 1px dashed var(--bord); border-radius: var(--rayon); }
 .alerte { background: var(--casse-doux); color: var(--texte); border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; font-size: .93rem; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* Accueil : démonstration agents IA */
+.ia-grille { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 14px; margin-top: 14px; }
+.ia-question { font-weight: 700; font-size: 1.05rem; margin-bottom: 10px; }
+.ia-reponse { padding: 8px 0; }
+.ia-reponse .badge { margin-right: 6px; }
+@media (max-width: 860px) { .ia-grille { grid-template-columns: minmax(0, 1fr); } }

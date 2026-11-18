@@ -207,3 +207,19 @@ def test_licence_declaree(client):
     assert "Déclarée par l'auteur" in client.get("/connecteurs/brvm-mcp").text
     c = Connecteur(gh_licence="MIT", licence_declaree="Commerciale")
     assert c.licence == "MIT"  # la licence relevée sur le dépôt prime
+
+
+def test_connecteurs_references(client):
+    from app.amorce import referencer
+    from app.references import REFERENCES
+    referencer()
+    referencer()  # idempotent
+    fiches = {c["slug"]: c for c in client.get("/api/connecteurs").json()}
+    for d in REFERENCES:
+        assert d["slug"] in fiches
+        assert fiches[d["slug"]]["reference_par_la_plateforme"] is True
+    assert fiches["mpesa-mcp"]["auteur"] == "gabrielmahia"  # le vrai auteur du code est crédité
+    page = client.get("/connecteurs/mpesa-mcp").text
+    assert "auteur du code" in page and "github.com/gabrielmahia" in page
+    assert "veille" not in client.get("/classement").text
+    assert fiches["momo-xof-mcp"]["reference_par_la_plateforme"] is False
